@@ -28,17 +28,25 @@ let ArticleService = class ArticleService {
         return await this.articleModel.find().exec();
     }
     async findOne(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new Error('Invalid article ID');
+        }
         return await this.articleModel.findById(id).exec();
     }
     async create(createArticleDto) {
         return await this.articleModel.create(createArticleDto);
     }
     async update(id, createArticleDto) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new Error('Invalid article ID');
+        }
         return await this.articleModel.findByIdAndUpdate(id, createArticleDto).exec();
     }
     async delete(id) {
-        const deletedArticle = await this.articleModel.findByIdAndDelete(id).exec();
-        return deletedArticle;
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new Error('Invalid article ID');
+        }
+        return await this.articleModel.findByIdAndDelete(id).exec();
     }
     async search(title) {
         if (!title) {
@@ -48,17 +56,20 @@ let ArticleService = class ArticleService {
         return await this.articleModel.find({ title: { $regex: searchPattern } }).exec();
     }
     async updateStatus(id, createArticleDto) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new Error('Invalid article ID');
+        }
         const article = await this.articleModel.findOne({ _id: id }).exec();
-        if (article?._id) {
-            const newStatus = 0;
-            if (article?.status === '0') {
-                const newStatus = 1;
-            }
-            let data = {
+        if (article) {
+            const newStatus = article.status === '0' ? 1 : 0;
+            const data = {
                 ...createArticleDto,
-                status: newStatus
+                status: newStatus,
             };
             return await this.articleModel.findByIdAndUpdate(id, data).exec();
+        }
+        else {
+            throw new Error('Article not found');
         }
     }
 };
